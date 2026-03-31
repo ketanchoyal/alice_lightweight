@@ -72,20 +72,33 @@ class _AliceCallDetailsScreenState extends State<AliceCallDetailsScreen>
         floatingActionButton: GestureDetector(
           key: Key('quick_share_action_key'),
           onLongPress: () => widget.core.quickShareAction?.call(call),
-          child: FloatingActionButton(
-            backgroundColor: AliceConstants.lightRed(widget.customColors),
-            key: Key('share_key'),
-            onPressed: () async {
-              SharePlus.instance.share(
-                ShareParams(
-                  title: 'Alice - HTTP Call Details',
-                  subject: 'Request Details',
-                  text: await _getSharableResponseString(),
-                ),
-              );
-            },
-            child: Icon(Icons.share, color: Colors.white),
-          ),
+          child: Builder(builder: (context) {
+            //location of the button based on this context, so the share dialog will be shown in correct place
+            final RenderBox button = context.findRenderObject() as RenderBox;
+            final Offset buttonPosition = button.localToGlobal(Offset.zero);
+            final Size buttonSize = button.size;
+
+            return FloatingActionButton(
+              backgroundColor: AliceConstants.lightRed(widget.customColors),
+              key: Key('share_key'),
+              onPressed: () async {
+                SharePlus.instance.share(
+                  ShareParams(
+                    title: 'Alice - HTTP Call Details',
+                    subject: 'Request Details',
+                    sharePositionOrigin: Rect.fromLTWH(
+                      buttonPosition.dx,
+                      buttonPosition.dy,
+                      buttonSize.width,
+                      buttonSize.height,
+                    ),
+                    text: await _getSharableResponseString(),
+                  ),
+                );
+              },
+              child: Icon(Icons.share, color: Colors.white),
+            );
+          }),
         ),
         appBar: AppBar(
           bottom: TabBar(
